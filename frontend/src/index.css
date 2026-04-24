@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", sans-serif;
+  --color-canvas: #F0F0F0;
+  --color-bauhaus-black: #121212;
+  --color-bauhaus-red: #D02020;
+  --color-bauhaus-blue: #1040C0;
+  --color-bauhaus-yellow: #F0C020;
+  --shadow-bauhaus-sm: 4px 4px 0px 0px #121212;
+  --shadow-bauhaus-md: 6px 6px 0px 0px #121212;
+  --shadow-bauhaus-lg: 8px 8px 0px 0px #121212;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-bauhaus-black);
+  }
+}
+
+.bg-pattern-dots {
+  background-image: radial-gradient(rgba(18, 18, 18, 0.1) 2px, transparent 2px);
+  background-size: 20px 20px;
+}
