@@ -1,8 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Cairo:wght@400;700;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Cairo", sans-serif;
+  --font-display: "Outfit", sans-serif;
   --color-canvas: #F0F0F0;
   --color-bauhaus-black: #121212;
   --color-bauhaus-red: #D02020;
@@ -11,6 +12,8 @@
   --shadow-bauhaus-sm: 4px 4px 0px 0px #121212;
   --shadow-bauhaus-md: 6px 6px 0px 0px #121212;
   --shadow-bauhaus-lg: 8px 8px 0px 0px #121212;
+  --color-primary: #D02020;
+  --shadow-brutal-sm: 4px 4px 0px 0px #121212;
 }
 
 @layer base {

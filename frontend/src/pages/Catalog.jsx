@@ -9,10 +9,10 @@ import { useBooks, useDeleteBook } from '../hooks/useBooks';
 
 export default function Catalog() {
   const navigate = useNavigate();
-  
+
   // Fetch books data from API
   const { data: books = [], isLoading, isError, error } = useBooks();
-  
+
   // Mutation hook for deleting a book
   const deleteBookMutation = useDeleteBook();
 
@@ -69,8 +69,8 @@ export default function Catalog() {
               <thead>
                 <tr className="border-b-4 border-bauhaus-black bg-canvas">
                   <th className="p-4 font-bold uppercase tracking-wider text-sm">ID</th>
-                  <th className="p-4 font-bold uppercase tracking-wider text-sm">Title & Author</th>
-                  <th className="p-4 font-bold uppercase tracking-wider text-sm">Category</th>
+                  <th className="p-4 font-bold uppercase tracking-wider text-sm">Title  </th>
+                  <th className="p-4 font-bold uppercase tracking-wider text-sm">Author</th>
                   <th className="p-4 font-bold uppercase tracking-wider text-sm">quantity</th>
                   <th className="p-4 font-bold uppercase tracking-wider text-sm">status</th>
                   <th className="p-4"></th>
@@ -82,9 +82,10 @@ export default function Catalog() {
                     <td className="p-4 font-black">{book.id}</td>
                     <td className="p-4">
                       <div className="font-bold text-lg uppercase leading-tight">{book.title}</div>
-                      <div className="font-medium mt-1">{book.author}</div>
                     </td>
-                    <td className="p-4 font-bold uppercase">{book.category}</td>
+                    <td className="p-4 font-medium">
+                      {book.author}
+                    </td>
                     <td className="p-4 font-medium">{book.quantity}</td>
                     <td className="p-4">
                       <Badge variant={book.status === 'AVAILABLE' ? 'primary' : book.status === 'LOW STOCK' ? 'error' : 'neutral'}>
@@ -119,7 +120,7 @@ export default function Catalog() {
                 {books.length === 0 && (
                   <tr>
                     <td colSpan="6" className="p-8 text-center font-bold text-gray-500 uppercase tracking-widest">
-                      No books found in the catalog
+                      No books found
                     </td>
                   </tr>
                 )}

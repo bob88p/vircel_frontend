@@ -1,60 +1,59 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Book, User, Calendar, ArrowLeft, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import Badge from '../components/Badge';
+import { useSearchStudentLoans, useReturnBook } from '../hooks/useTransactions';
 
 export default function Return() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    bookId: '',
-    customerId: '',
-    returnDate: new Date().toISOString().split('T')[0],
-  });
+  const location = useLocation();
 
-  const [customerSearch, setCustomerSearch] = useState('');
-  const [showCustomerResults, setShowCustomerResults] = useState(false);
+  // Handle initial state from router (e.g. from CustomerProfile)
+  useEffect(() => {
+    if (location.state?.customerName) {
+      setLoanQuery(location.state.customerName);
+      setShowResults(true);
+    }
+  }, [location.state]);
+  const [succeeded, setSucceeded] = useState(false);
+  const [returnResult, setReturnResult] = useState(null);
 
-  const customers = [
-    { id: 'C-1042', name: 'Eleanor Vance' },
-    { id: 'C-1044', name: 'Luke Sanderson' },
-    { id: 'C-1046', name: 'Agatha Christie' },
-  ];
+  const [loanQuery, setLoanQuery] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const [selectedLoan, setSelectedLoan] = useState(null);
 
-  const currentlyBorrowed = [
-    { id: 'B-001', title: 'The Elements of Typographic Style', borrower: 'Eleanor Vance', borrowerId: 'C-1042', dueDate: '2026-04-30' },
-    { id: 'B-003', title: 'Designing Data-Intensive Applications', borrower: 'Luke Sanderson', borrowerId: 'C-1044', dueDate: '2026-04-20' },
-    { id: 'B-006', title: 'The Visual Display of Quantitative Information', borrower: 'Agatha Christie', borrowerId: 'C-1046', dueDate: '2026-05-05' },
-  ];
-
-  const filteredCustomers = customers.filter(c => 
-    c.name.toLowerCase().includes(customerSearch.toLowerCase()) || 
-    c.id.toLowerCase().includes(customerSearch.toLowerCase())
-  );
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const { data: loanResults = [], isFetching } = useSearchStudentLoans(loanQuery);
+  const returnMutation = useReturnBook();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simulate API call
-    console.log('Returning book:', formData);
-    setStep(3); // Success step
+    if (!selectedLoan) return;
+    returnMutation.mutate(selectedLoan.loan_id, {
+      onSuccess: (data) => {
+        setReturnResult(data);
+        setSucceeded(true);
+      },
+    });
   };
 
-  const selectedTransaction = currentlyBorrowed.find(b => b.id === formData.bookId);
+  const reset = () => {
+    setSucceeded(false);
+    setReturnResult(null);
+    setSelectedLoan(null);
+    setLoanQuery('');
+  };
+
+  const isOverdue = selectedLoan && new Date(selectedLoan.due_date) < new Date();
 
   return (
     <div className="flex flex-col gap-12 max-w-5xl mx-auto">
       <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          shape="square" 
+        <Button
+          variant="ghost"
+          shape="square"
           onClick={() => navigate(-1)}
           className="border-2 border-bauhaus-black hover:bg-bauhaus-blue transition-colors"
         >
@@ -65,136 +64,98 @@ export default function Return() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          {step === 1 || step === 2 ? (
+          {!succeeded ? (
             <Card decoration="square" decorationColor="bg-bauhaus-blue" className="h-full">
               <form onSubmit={handleSubmit} className="flex flex-col gap-8">
                 <div className="border-b-4 border-bauhaus-black pb-4">
                   <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3">
-                    <span className="bg-bauhaus-blue text-white w-8 h-8 flex items-center justify-center rounded-none border-2 border-bauhaus-black">1</span>
-                    Return Details
+                    <span className="bg-bauhaus-blue text-white w-8 h-8 flex items-center justify-center border-2 border-bauhaus-black">1</span>
+                    Find Active Loan
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="flex flex-col gap-4 relative">
-                    <div className="flex justify-between items-end">
-                      <label className="font-bold uppercase tracking-widest text-sm">Select Customer</label>
-                      <button 
-                        type="button"
-                        onClick={() => navigate('/customers')}
-                        className="text-xs font-black uppercase text-bauhaus-blue hover:underline"
-                      >
-                        + Add New
-                      </button>
-                    </div>
-                    <div className="relative group">
-                      <Input
-                        placeholder="SEARCH BY NAME OR ID..."
-                        value={customerSearch}
-                        onChange={(e) => {
-                          setCustomerSearch(e.target.value);
-                          setShowCustomerResults(true);
-                          if (formData.customerId) setFormData(prev => ({ ...prev, customerId: '' }));
-                        }}
-                        onFocus={() => setShowCustomerResults(true)}
-                        className="uppercase"
-                      />
-                      {showCustomerResults && customerSearch.length > 0 && (
-                        <div className="absolute z-20 left-0 right-0 mt-2 bg-white border-4 border-bauhaus-black shadow-bauhaus-md max-h-60 overflow-y-auto">
-                          {filteredCustomers.length > 0 ? (
-                            filteredCustomers.map(customer => (
-                              <div 
-                                key={customer.id}
-                                className="p-4 hover:bg-bauhaus-blue hover:text-white cursor-pointer border-b-2 border-bauhaus-black last:border-b-0 font-bold uppercase transition-colors"
-                                onClick={() => {
-                                  setFormData(prev => ({ ...prev, customerId: customer.id, bookId: '' }));
-                                  setCustomerSearch(customer.name);
-                                  setShowCustomerResults(false);
-                                }}
-                              >
-                                <div className="flex justify-between">
-                                  <span>{customer.name}</span>
-                                  <span className="opacity-60 text-xs">{customer.id}</span>
-                                </div>
+                {/* Loan search */}
+                <div className="flex flex-col gap-4 relative">
+                  <label className="font-bold uppercase tracking-widest text-sm">Search by Student Name or Email</label>
+                  <div className="relative">
+                    <Input
+                      placeholder="SEARCH STUDENT..."
+                      value={loanQuery}
+                      onChange={(e) => {
+                        setLoanQuery(e.target.value);
+                        setShowResults(true);
+                        setSelectedLoan(null);
+                      }}
+                      onFocus={() => setShowResults(true)}
+                      className="uppercase"
+                    />
+                    {isFetching && (
+                      <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-bauhaus-blue" />
+                    )}
+                    {showResults && loanQuery.length >= 2 && (
+                      <div className="absolute z-20 left-0 right-0 mt-2 bg-white border-4 border-bauhaus-black shadow-bauhaus-md max-h-72 overflow-y-auto">
+                        {loanResults.length > 0 ? (
+                          loanResults.map((loan) => (
+                            <div
+                              key={loan.loan_id}
+                              className="p-4 hover:bg-bauhaus-blue hover:text-white cursor-pointer border-b-2 border-bauhaus-black last:border-b-0 font-bold uppercase transition-colors"
+                              onClick={() => {
+                                setSelectedLoan(loan);
+                                setLoanQuery(loan.student_name);
+                                setShowResults(false);
+                              }}
+                            >
+                              <div className="flex justify-between">
+                                <span>{loan.student_name}</span>
+                                <span className="opacity-60 text-xs">Loan #{loan.loan_id}</span>
                               </div>
-                            ))
-                          ) : (
-                            <div className="p-4 text-gray-500 font-bold uppercase">No customers found</div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-4">
-                    <label className="font-bold uppercase tracking-widest text-sm">Select Borrowed Book</label>
-                    <select 
-                      name="bookId"
-                      value={formData.bookId}
-                      onChange={handleInputChange}
-                      className="w-full p-4 border-4 border-bauhaus-black font-bold uppercase tracking-tight focus:bg-bauhaus-yellow transition-colors outline-none appearance-none bg-white disabled:opacity-50 disabled:cursor-not-allowed"
-                      required
-                      disabled={!formData.customerId}
-                    >
-                      {!formData.customerId ? (
-                        <option value="">-- SELECT CUSTOMER FIRST --</option>
-                      ) : (
-                        <>
-                          <option value="">-- SELECT BOOK TO RETURN --</option>
-                          {currentlyBorrowed
-                            .filter(book => book.borrowerId === formData.customerId)
-                            .map(item => (
-                              <option key={item.id} value={item.id}>{item.title}</option>
-                            ))
-                          }
-                        </>
-                      )}
-                    </select>
-                    {formData.customerId && currentlyBorrowed.filter(book => book.borrowerId === formData.customerId).length === 0 && (
-                      <div className="text-xs font-bold text-bauhaus-red uppercase tracking-widest mt-1">
-                        This customer has no active borrows.
+                              <div className="text-xs opacity-80 mt-1">{loan.book_title}</div>
+                              <div className="text-xs opacity-60">Due: {loan.due_date?.slice(0, 10)}</div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-4 text-gray-500 font-bold uppercase">No active loans found</div>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
 
-                {selectedTransaction && (
+                {/* Selected loan detail */}
+                {selectedLoan && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-100 p-6 border-4 border-bauhaus-black border-dashed">
                     <div className="flex flex-col gap-2">
-                      <div className="text-xs font-black uppercase text-gray-500">Borrower Information</div>
-                      <div className="font-bold text-xl">{selectedTransaction.borrower}</div>
-                      <div className="text-sm font-bold tracking-widest opacity-70">ID: {selectedTransaction.borrowerId}</div>
+                      <div className="text-xs font-black uppercase text-gray-500">Borrower</div>
+                      <div className="font-bold text-xl">{selectedLoan.student_name}</div>
+                      <div className="text-sm font-bold tracking-widest opacity-70">{selectedLoan.student_email}</div>
+                      <div className="text-sm font-bold opacity-60">{selectedLoan.faculty} · Year {selectedLoan.year}</div>
                     </div>
                     <div className="flex flex-col gap-2">
-                      <div className="text-xs font-black uppercase text-gray-500">Due Date Status</div>
-                      <div className="font-black text-xl">{selectedTransaction.dueDate}</div>
-                      <Badge variant={new Date(selectedTransaction.dueDate) < new Date() ? 'error' : 'neutral'}>
-                        {new Date(selectedTransaction.dueDate) < new Date() ? 'OVERDUE' : 'ON TIME'}
+                      <div className="text-xs font-black uppercase text-gray-500">Book &amp; Due Date</div>
+                      <div className="font-bold text-lg leading-tight">{selectedLoan.book_title}</div>
+                      <div className="font-black text-xl">{selectedLoan.due_date?.slice(0, 10)}</div>
+                      <Badge variant={isOverdue ? 'error' : 'primary'}>
+                        {isOverdue ? 'OVERDUE' : 'ON TIME'}
                       </Badge>
+                      {selectedLoan.fine > 0 && (
+                        <div className="font-black text-bauhaus-red text-sm">Fine: ¥{selectedLoan.fine}</div>
+                      )}
                     </div>
                   </div>
                 )}
 
-                <div className="flex flex-col gap-4">
-                  <label className="font-bold uppercase tracking-widest text-sm">Return Date</label>
-                  <input 
-                    type="date" 
-                    name="returnDate"
-                    value={formData.returnDate}
-                    onChange={handleInputChange}
-                    className="w-full p-4 border-4 border-bauhaus-black font-bold uppercase tracking-tight focus:bg-bauhaus-red focus:text-white transition-colors outline-none bg-white"
-                    required
-                  />
-                </div>
-
                 <div className="pt-4 border-t-4 border-bauhaus-black flex justify-end">
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     type="submit"
                     className="py-4 px-12 text-xl shadow-bauhaus-md"
-                    disabled={!formData.bookId}
+                    disabled={!selectedLoan || returnMutation.isPending}
                   >
-                    Confirm Return
+                    {returnMutation.isPending ? (
+                      <><Loader2 size={20} className="animate-spin" /> Processing...</>
+                    ) : (
+                      'Confirm Return'
+                    )}
                   </Button>
                 </div>
               </form>
@@ -202,38 +163,55 @@ export default function Return() {
           ) : (
             <Card decoration="circle" decorationColor="bg-bauhaus-yellow" className="h-full flex flex-col items-center justify-center text-center p-12">
               <div className="bg-bauhaus-blue text-white p-6 border-4 border-bauhaus-black mb-8">
-                <RefreshCw size={80} strokeWidth={2.5} className="animate-spin-slow" />
+                <RefreshCw size={80} strokeWidth={2.5} />
               </div>
               <h2 className="text-5xl font-black uppercase tracking-tighter mb-4">Book Returned</h2>
-              <p className="text-xl font-bold mb-8 max-w-md">The book has been successfully returned and updated in the inventory catalog.</p>
-              <div className="flex gap-4">
-                <Button variant="outline" onClick={() => setStep(1)} className="py-3 px-8">Return Another</Button>
+              <p className="text-xl font-bold mb-2 max-w-md">
+                {returnResult?.transaction?.book_title || 'The book'} has been successfully returned.
+              </p>
+              {returnResult?.transaction?.fine > 0 && (
+                <div className="bg-bauhaus-red text-white px-6 py-3 border-4 border-bauhaus-black font-black uppercase tracking-wider mb-6">
+                  Fine Applied: ¥{returnResult.transaction.fine}
+                </div>
+              )}
+              <div className="flex gap-4 mt-4">
+                <Button variant="outline" onClick={reset} className="py-3 px-8">Return Another</Button>
                 <Button variant="primary" onClick={() => navigate('/')} className="py-3 px-8 shadow-bauhaus-sm">Back to Dashboard</Button>
               </div>
             </Card>
           )}
         </div>
 
+        {/* Summary sidebar */}
         <div className="flex flex-col gap-8">
           <Card decoration="triangle" decorationColor="bg-bauhaus-blue" className="bg-bauhaus-black text-white">
             <h3 className="text-2xl font-black uppercase tracking-tighter mb-6 border-b-2 border-white/20 pb-2">Return Summary</h3>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-bold uppercase tracking-widest text-bauhaus-blue">Book</span>
-                <span className="font-bold text-lg">{selectedTransaction ? selectedTransaction.title : 'Not Selected'}</span>
+                <span className="font-bold text-lg">{selectedLoan ? selectedLoan.book_title : 'Not Selected'}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-bold uppercase tracking-widest text-bauhaus-yellow">Borrower</span>
-                <span className="font-bold text-lg">{selectedTransaction ? selectedTransaction.borrower : 'Not Selected'}</span>
+                <span className="font-bold text-lg">{selectedLoan ? selectedLoan.student_name : 'Not Selected'}</span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-xs font-bold uppercase tracking-widest text-white/60">Customer ID</span>
-                <span className="font-bold">{formData.customerId || (selectedTransaction ? selectedTransaction.borrowerId : '---')}</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-bauhaus-red">Fine (if late)</span>
+                <span className="font-bold">{selectedLoan?.fine > 0 ? `¥${selectedLoan.fine}` : 'No fine'}</span>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-bold uppercase tracking-widest text-bauhaus-red">Condition Check</span>
-                <span className="font-bold">Good / Perfect</span>
+            </div>
+          </Card>
+
+          <Card className="bg-bauhaus-blue text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-bauhaus-red -translate-y-1/2 translate-x-1/2 rotate-45 border-4 border-bauhaus-black" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertCircle size={20} />
+                <span className="font-black uppercase tracking-widest text-xs">Library Policy</span>
               </div>
+              <p className="font-bold text-sm leading-relaxed">
+                Late returns incur a ¥5 daily fine. Fines must be paid before the next borrow.
+              </p>
             </div>
           </Card>
         </div>

@@ -9,7 +9,7 @@ import { useBook, useUpdateBook } from '../hooks/useBooks';
 export default function UpdateBook() {
   const navigate = useNavigate();
   const { id } = useParams();
-  
+
   const { data: bookData, isLoading: isLoadingBook } = useBook(id);
   const updateBookMutation = useUpdateBook();
 
@@ -28,26 +28,12 @@ export default function UpdateBook() {
       // For now, we will fallback to string or try to match it if it's returning the ID.
       // Based on the backend, insert_book/update_book uses category_id, get_books returns "category".
       // Assuming GET /books/{id} returns something we can map or the user has to reselect.
-      
-      // Let's create a map for our hardcoded categories for seamless editing
-      const categoryMap = {
-        'Database': '1',
-        'Programming': '2',
-        'AI': '3',
-        'History': '4',
-        'Design': '5'
-      };
 
-      // Try to determine category ID either from direct field or mapping the name
-      let catId = bookData.category_id || bookData.category;
-      if (bookData.category && categoryMap[bookData.category]) {
-          catId = categoryMap[bookData.category];
-      }
+
 
       setFormData({
         title: bookData.title || '',
         author: bookData.author || '',
-        category_id: catId || '',
         quantity: bookData.quantity || '',
       });
     }
@@ -60,14 +46,14 @@ export default function UpdateBook() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Parse quantity and category_id as integers for the API
     const payload = {
       ...formData,
       quantity: parseInt(formData.quantity, 10),
       category_id: parseInt(formData.category_id, 10),
     };
-    
+
     updateBookMutation.mutate({ id, bookData: payload }, {
       onSuccess: () => {
         navigate('/catalog');
@@ -87,9 +73,9 @@ export default function UpdateBook() {
   return (
     <div className="flex flex-col gap-12 max-w-5xl mx-auto">
       <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          shape="square" 
+        <Button
+          variant="ghost"
+          shape="square"
           onClick={() => navigate(-1)}
           className="border-2 border-bauhaus-black hover:bg-bauhaus-blue transition-colors"
         >
@@ -113,7 +99,7 @@ export default function UpdateBook() {
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2">
                 <label className="font-bold uppercase tracking-widest text-sm">Title</label>
-                <Input 
+                <Input
                   name="title"
                   placeholder="BOOK TITLE..."
                   value={formData.title}
@@ -124,7 +110,7 @@ export default function UpdateBook() {
               </div>
               <div className="flex flex-col gap-2">
                 <label className="font-bold uppercase tracking-widest text-sm">Author</label>
-                <Input 
+                <Input
                   name="author"
                   placeholder="AUTHOR NAME..."
                   value={formData.author}
@@ -133,29 +119,10 @@ export default function UpdateBook() {
                   className="uppercase"
                 />
               </div>
-            </div>
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="font-bold uppercase tracking-widest text-sm">Category</label>
-                <select 
-                  name="category_id"
-                  value={formData.category_id}
-                  onChange={handleInputChange}
-                  className="w-full p-3 bg-white border-4 border-bauhaus-black font-bold uppercase tracking-tight focus:bg-bauhaus-blue focus:text-white transition-colors outline-none appearance-none"
-                  required
-                >
-                  <option value="">-- CHOOSE CATEGORY --</option>
-                  <option value="1">Database</option>
-                  <option value="2">Programming</option>
-                  <option value="3">AI</option>
-                  <option value="4">History</option>
-                  <option value="5">Design</option>
-                </select>
-              </div>
               <div className="flex flex-col gap-2">
                 <label className="font-bold uppercase tracking-widest text-sm">Quantity</label>
-                <Input 
+                <Input
                   name="quantity"
                   type="number"
                   min="1"
@@ -169,8 +136,8 @@ export default function UpdateBook() {
           </div>
 
           <div className="pt-6 border-t-4 border-bauhaus-black flex justify-between">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               type="button"
               onClick={() => navigate('/catalog')}
               className="py-3 px-8 text-lg"
@@ -178,8 +145,8 @@ export default function UpdateBook() {
             >
               Discard Changes
             </Button>
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               type="submit"
               className="py-4 px-12 text-xl shadow-bauhaus-md flex items-center gap-3"
               disabled={updateBookMutation.isPending}

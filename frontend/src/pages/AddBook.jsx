@@ -24,14 +24,14 @@ export default function AddBook() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Parse quantity and category_id as integers for the API
     const payload = {
       ...formData,
       quantity: parseInt(formData.quantity, 10),
       category_id: parseInt(formData.category_id, 10),
     };
-    
+
     createBookMutation.mutate(payload, {
       onSuccess: () => {
         navigate('/catalog');
@@ -86,26 +86,7 @@ export default function AddBook() {
                   className="uppercase"
                 />
               </div>
-            </div>
 
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="font-bold uppercase tracking-widest text-sm">Category</label>
-                <select
-                  name="category_id"
-                  value={formData.category_id}
-                  onChange={handleInputChange}
-                  className="w-full p-3 bg-white border-4 border-bauhaus-black font-bold uppercase tracking-tight focus:bg-bauhaus-blue focus:text-white transition-colors outline-none appearance-none"
-                  required
-                >
-                  <option value="">-- CHOOSE CATEGORY --</option>
-                  <option value="1">Database</option>
-                  <option value="2">Programming</option>
-                  <option value="3">AI</option>
-                  <option value="4">History</option>
-                  <option value="5">Design</option>
-                </select>
-              </div>
               <div className="flex flex-col gap-2">
                 <label className="font-bold uppercase tracking-widest text-sm">Quantity</label>
                 <Input

@@ -24,7 +24,6 @@ export const useBooks = () => {
   return useQuery({
     queryKey: bookKeys.lists(),
     queryFn: getBooks,
-    enabled: false
   });
 };
 

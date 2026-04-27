@@ -18,12 +18,14 @@ const TopBar = () => {
           <Bell size={24} strokeWidth={2.5} />
         </Button>
         <div className="flex items-center gap-4 border-l-4 border-bauhaus-black pl-8">
-          <div className="w-12 h-12 rounded-full border-4 border-bauhaus-black bg-bauhaus-red flex items-center justify-center text-white font-black text-xl shadow-[2px_2px_0px_0px_#121212]">
-            mr
-          </div>
+          <button className="flex items-center gap-2 border-4 border-black bg-primary px-4 py-2 shadow-brutal-sm text-white hover:translate-x-[2px] hover:translate-y-[2px] transition-all active:translate-x-[4px] active:translate-y-[4px] duration-75">
+            <span className="material-symbols-outlined">person</span>
+            <span className="">Profile</span>
+          </button>
+
           <div>
-            <div className="font-black uppercase tracking-wider leading-none">Mr. Robot</div>
-            <div className="font-bold text-sm tracking-widest text-bauhaus-blue mt-1">you are in  1911</div>
+            <div className="font-black uppercase tracking-wider leading-none font-display">Mr. Robot</div>
+            <div className="font-bold text-sm tracking-widest text-bauhaus-blue mt-1 font-display">you are in  1911</div>
           </div>
         </div>
       </div>

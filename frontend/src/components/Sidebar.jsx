@@ -2,13 +2,16 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Library, BookOpen, Users, Activity, Settings } from 'lucide-react';
 
+import logo from '../assets/logo.webp';
+
+
 const navItems = [
-  { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
+  { name: 'Home', icon: LayoutDashboard, path: '/' },
   { name: 'Books', icon: BookOpen, path: '/catalog' },
-  { name: 'Categories', icon: Library, path: '/categories' },
-  { name: 'Customers', icon: Users, path: '/customers' },
+  { name: 'students', icon: Users, path: '/customers' },
   { name: 'Transactions', icon: Activity, path: '/circulation' },
   { name: 'Analytics', icon: Settings, path: '/analytics' },
+
 ];
 
 const Sidebar = () => {
@@ -16,19 +19,34 @@ const Sidebar = () => {
 
   return (
     <aside className="w-64 bg-bauhaus-yellow border-r-4 border-bauhaus-black h-screen fixed left-0 top-0 overflow-y-auto flex flex-col z-20">
-      <div className="p-8 border-b-4 border-bauhaus-black bg-white">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-bauhaus-red border-4 border-bauhaus-black flex items-center justify-center rotate-12">
-            <div className="w-3 h-3 bg-bauhaus-blue rounded-full"></div>
+      <div className="p-6 border-b-4 border-bauhaus-black bg-white relative overflow-hidden group">
+        {/* Decorative background element */}
+        <div className="absolute top-0 right-0 w-16 h-16 bg-bauhaus-yellow -rotate-45 translate-x-8 -translate-y-8 border-l-4 border-b-4 border-bauhaus-black transition-transform duration-500 group-hover:translate-x-6 group-hover:-translate-y-6"></div>
+        
+        <div className="relative flex flex-col gap-4">
+          {/* Logo container with double-border shadow effect */}
+          <div className="relative w-20 h-20">
+            <div className="absolute inset-0 bg-bauhaus-red border-4 border-bauhaus-black translate-x-2 translate-y-2"></div>
+            <div className="relative w-full h-full border-4 border-bauhaus-black bg-white flex items-center justify-center transition-transform duration-300 hover:-translate-x-1 hover:-translate-y-1">
+              <img src={logo} alt="Logo" className="w-full h-full object-contain p-2" />
+            </div>
           </div>
-          <h1 className="text-2xl font-black uppercase tracking-tighter leading-none">
-            Smart<br />Library
-          </h1>
+
+          {/* Typography with staggered layout */}
+          <div className="flex flex-col">
+            <span className="bg-bauhaus-black text-white px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] w-fit mb-1 font-display">
+              Official
+            </span>
+            <h1 className="text-3xl font-black uppercase tracking-tighter leading-[0.85] text-bauhaus-black font-display">
+              Library<br />
+              <span className="text-bauhaus-blue text-2xl">Kafrelsheikh</span>
+            </h1>
+          </div>
         </div>
       </div>
 
       <nav className="flex-1 p-6 flex flex-col gap-2">
-        <div className="text-sm font-bold uppercase tracking-widest mb-4">Menu</div>
+        <div className="text-sm font-bold uppercase tracking-widest mb-4 font-display">Menu</div>
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
